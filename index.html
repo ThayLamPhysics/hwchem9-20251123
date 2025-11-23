@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài học Hóa 9: Ankan</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Cấu hình Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nature-green-light': '#FEE1E8', // Thay bằng màu hồng nhạt
+                        'nature-green': '#C6DBDA', // Thay bằng màu xanh-lục nhạt
+                        'nature-green-dark': '#488A88', // Màu teal đậm (tạo mới) để làm màu chữ/nhấn
+                        'sunny-yellow': '#F6EAC2', // Thay bằng màu vàng kem
+                        'sunny-yellow-dark': '#FED7C3', // Thay bằng màu cam/đào nhạt
+                        'nature-lavender': '#ECD5E3', // Thêm màu lavender từ bảng màu
+                        'text-dark': '#2C3E50', // Màu chữ đậm (giữ nguyên)
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'], // Font chữ Inter
+                    },
+                    transitionDuration: {
+                        '700': '700ms',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Tải MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        chtml: { // Yêu cầu sử dụng CommonHTML (chtml)
+          fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+        },
+        startup: {
+          ready: () => {
+            MathJax.startup.defaultReady();
+            MathJax.startup.promise.then(() => {
+              // Xử lý lại MathJax khi chuyển tab
+              window.addEventListener('tab-changed', () => {
+                MathJax.typesetPromise();
+              });
+            });
+          }
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+
+    <!-- CSS tùy chỉnh -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB; /* Nền xám nhạt */
+        }
+
+        /* ----- Kiểu nút ----- */
+        /* Nút chính (Bắt đầu) - Đã chuyển sang inline class */
+        
+        /* Nút phụ (Nộp bài, Gửi) - Ví dụ */
+        /* (Không dùng trong file này) */
+
+        /* Nút lựa chọn Quiz (Ví dụ nếu không dùng iframe) */
+        /* (Không dùng trong file này) */
+
+
+        /* ----- Kiểu Tab ----- */
+        /* Tab trên desktop */
+        /* Đã chuyển sang JavaScript */
+        
+        /* Tab trên di động */
+        /* Đã chuyển sang JavaScript */
+
+        /* Ẩn nội dung tab mặc định */
+        .tab-content {
+            display: none;
+        }
+
+        /* ----- Kiểu SVG Animations ----- */
+        @keyframes vibrate {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 1px) rotate(0deg); }
+            75% { transform: translate(-1px, -1px) rotate(-1deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
+        }
+        .vibrate-atom {
+            animation: vibrate 1.5s ease-in-out infinite;
+        }
+
+        @keyframes move-particle-ch4 {
+            from { cx: 20; opacity: 1; }
+            to { cx: 140; opacity: 0; }
+        }
+        @keyframes move-particle-o2 {
+            from { cx: 70; opacity: 1; }
+            to { cx: 140; opacity: 0; }
+        }
+        @keyframes show-product-co2 {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes show-product-h2o {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes draw-path {
+            from { stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+        .drawing-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-path 3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="text-text-dark">
+
+    <!-- Trang mở đầu (Splash Screen) -->
+    <div id="splash-screen" class="fixed top-0 left-0 w-screen h-screen bg-gradient-to-br from-nature-green-light via-white to-nature-lavender z-50 flex flex-col justify-center items-center transition-all duration-700 ease-in-out">
+        <div class="text-center p-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-nature-green-dark mb-4">Bài học Hóa học Lớp 9</h1>
+            <h2 class="text-3xl md:text-5xl font-light text-text-dark mb-8">Chủ đề: ANKAN</h2>
+            <p class="text-xl text-gray-700 mb-12">với Thầy Lâm</p>
+            <button id="start-button" class="rounded-full px-8 py-3 text-lg font-semibold text-text-dark shadow-lg bg-gradient-to-r from-nature-lavender to-nature-green-light transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                Bắt đầu học
+            </button>
+        </div>
+    </div>
+
+    <!-- Nội dung chính của trang (ẩn ban đầu) -->
+    <div id="main-content" class="min-h-screen">
+        
+        <!-- Thanh điều hướng (Navigation) -->
+        <nav class="bg-white shadow-md fixed w-full top-0 left-0 z-40">
+            <!-- Thanh trên cùng (Desktop & Mobile Title/Hamburger) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Tiêu đề -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-nature-green-dark">Hóa 9: Ankan</span>
+                    </div>
+                    
+                    <!-- Nút Hamburger (chỉ hiện trên di động) -->
+                    <div class="flex items-center lg:hidden">
+                        <button id="hamburger-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nature-green">
+                            <span class="sr-only">Mở menu</span>
+                            <!-- Icon Hamburger -->
+                            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Menu Desktop (chỉ hiện trên desktop) -->
+                    <div class="hidden lg:flex lg:items-center lg:space-x-4">
+                        <button data-tab="tab-intro" class="tab-btn px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-nature-green-dark">Giới thiệu</button>
+                        <button data-tab="tab-1" class="tab-btn px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-nature-green-dark">1. Định nghĩa & Cấu tạo</button>
+                        <button data-tab="tab-2" class="tab-btn px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-nature-green-dark">2. Tính chất hóa học</button>
+                        <button data-tab="tab-3" class="tab-btn px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-nature-green-dark">3. Ứng dụng</button>
+                        <button data-tab="tab-test" class="tab-btn px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-nature-green-dark">Kiểm tra</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Di động (ẩn mặc định, trượt từ bên trái) -->
+            <div id="mobile-menu" class="lg:hidden fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out">
+                <!-- Nút đóng -->
+                <div class="flex justify-end p-4">
+                    <button id="close-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
+                        <span class="sr-only">Đóng menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Các mục menu dọc -->
+                <div class="flex flex-col space-y-2 p-4">
+                    <button data-tab="tab-intro" class="mobile-tab-btn block px-4 py-3 rounded-lg text-left text-base font-medium text-gray-700 hover:bg-gray-50">Giới thiệu</button>
+                    <button data-tab="tab-1" class="mobile-tab-btn block px-4 py-3 rounded-lg text-left text-base font-medium text-gray-700 hover:bg-gray-50">1. Định nghĩa & Cấu tạo</button>
+                    <button data-tab="tab-2" class="mobile-tab-btn block px-4 py-3 rounded-lg text-left text-base font-medium text-gray-700 hover:bg-gray-50">2. Tính chất hóa học</button>
+                    <button data-tab="tab-3" class="mobile-tab-btn block px-4 py-3 rounded-lg text-left text-base font-medium text-gray-700 hover:bg-gray-50">3. Ứng dụng</button>
+                    <button data-tab="tab-test" class="mobile-tab-btn block px-4 py-3 rounded-lg text-left text-base font-medium text-gray-700 hover:bg-gray-50">Kiểm tra</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Nội dung các Tab -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+            
+            <!-- Tab: Giới thiệu -->
+            <div id="tab-intro" class="tab-content p-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-nature-green-dark mb-4">Chào các em! Thầy Lâm đây.</h2>
+                <div class="space-y-4 text-lg text-gray-700">
+                    <p>Hôm nay, chúng ta sẽ cùng nhau khám phá một "gia tộc" hidrocacbon rất thú vị: gia tộc Ankan. </p>
+                    <p>Các em hãy tưởng tượng, học Hóa cũng giống như đi khám phá một khu rừng bí ẩn. Có những loài cây (chất) thì um tùm, phức tạp, dễ dàng bắt lửa (phản ứng). Nhưng cũng có những loài cây cổ thụ (như Ankan) trông thì đơn giản, trầm mặc, tưởng chừng như "trơ" với mọi thứ. Người ta còn gọi nó là Parafin, nghĩa là "ít ái lực" đó.</p>
+                    <p>Nhưng các em có biết không? Chính cái sự "trầm mặc" ấy lại ẩn chứa một sức mạnh nội tại ghê gớm. Giống như một người ít nói nhưng khi đã hành động thì rất dứt khoát, ankan khi "nổi giận" (phản ứng cháy) sẽ tỏa ra một nguồn năng lượng khổng lồ. Và sự "ít ái lực" của nó lại là một đức tính tuyệt vời cho những ứng dụng làm dung môi, bảo quản.</p>
+                    <p>Bài học hôm nay, thầy trò ta sẽ cùng nhau vén bức màn bí ẩn của "người bạn trầm mặc" này. Hãy cùng xem bạn ấy có cấu tạo ra sao, tính cách (tính chất) thế nào, và bạn ấy giúp ích gì cho chúng ta (ứng dụng) nhé!</p>
+                    <p>Hãy chọn các tab bên trên để bắt đầu khám phá!</p>
+                </div>
+            </div>
+
+            <!-- Tab 1: Định nghĩa, Công thức, Cấu tạo -->
+            <div id="tab-1" class="tab-content p-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-nature-green-dark mb-4">1. Định nghĩa, Công thức và Cấu tạo</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Phần lý thuyết -->
+                    <div class="text-lg space-y-4">
+                        <p><strong class="text-nature-green-dark">Định nghĩa:</strong> Ankan là những hidrocacbon no, mạch hở, trong phân tử chỉ có các liên kết đơn (C-C và C-H).</p>
+                        <p><strong class="text-nature-green-dark">Công thức chung (CCTTQ):</strong> Ankan tạo thành một dãy đồng đẳng có công thức chung là $C_nH_{2n+2}$ (với $n \ge 1$).</p>
+                        
+                        <h4 class="text-xl font-semibold text-nature-green-dark pt-2">Ví dụ:</h4>
+                        <ul class="list-disc list-inside ml-4 space-y-2">
+                            <li>$n=1$: $CH_4$ (Metan)</li>
+                            <li>$n=2$: $C_2H_6$ (Etan)</li>
+                            <li>$n=3$: $C_3H_8$ (Propan)</li>
+                            <li>$n=4$: $C_4H_{10}$ (Butan)</li>
+                        </ul>
+                        
+                        <h4 class="text-xl font-semibold text-nature-green-dark pt-2">Đặc điểm cấu tạo:</h4>
+                        <p>Trong phân tử ankan, các nguyên tử cacbon chỉ có <strong class="text-sunny-yellow-dark">liên kết đơn</strong>. Các nguyên tử $C$ và $H$ liên kết với nhau, tạo nên một "bộ xương" vững chắc.</p>
+                        <p>Ví dụ, phân tử Metan ($CH_4$) có cấu trúc tứ diện đều, với 1 nguyên tử Cacbon ở tâm và 4 nguyên tử Hidro ở 4 đỉnh.</p>
+                    </div>
+                    
+                    <!-- Phần SVG Mô phỏng -->
+                    <div class="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-4 min-h-[300px]">
+                        <h4 class="text-xl font-semibold text-text-dark mb-2">Mô phỏng: Phân tử Metan ($CH_4$)</h4>
+                        <svg viewBox="0 0 200 200" class="w-64 h-64">
+                            <!-- Các liên kết -->
+                            <line x1="100" y1="100" x2="100" y2="40" stroke="#6B7280" stroke-width="3"/>
+                            <line x1="100" y1="100" x2="160" y2="120" stroke="#6B7280" stroke-width="3"/>
+                            <line x1="100" y1="100" x2="40" y2="120" stroke="#6B7280" stroke-width="3"/>
+                            <!-- Liên kết nét đứt (khuất) -->
+                            <line x1="100" y1="100" x2="100" y2="160" stroke="#9CA3AF" stroke-width="3" stroke-dasharray="4 4"/>
+                            
+                            <!-- Nguyên tử C (Tâm) -->
+                            <circle cx="100" cy="100" r="25" fill="#F6EAC2" stroke="#FED7C3" stroke-width="3"/>
+                            <text x="100" y="108" text-anchor="middle" font-size="24" font-weight="bold" fill="#333">C</text>
+
+                            <!-- 4 Nguyên tử H (rung động) -->
+                            <g class="vibrate-atom" style="transform-origin: 100px 40px;">
+                                <circle cx="100" cy="40" r="15" fill="#C6DBDA" stroke="#488A88" stroke-width="2"/>
+                                <text x="100" y="45" text-anchor="middle" font-size="14" fill="#333">H</text>
+                            </g>
+                            <g class="vibrate-atom" style="transform-origin: 160px 120px; animation-delay: -0.3s;">
+                                <circle cx="160" cy="120" r="15" fill="#C6DBDA" stroke="#488A88" stroke-width="2"/>
+                                <text x="160" y="125" text-anchor="middle" font-size="14" fill="#333">H</text>
+                            </g>
+                            <g class="vibrate-atom" style="transform-origin: 40px 120px; animation-delay: -0.6s;">
+                                <circle cx="40" cy="120" r="15" fill="#C6DBDA" stroke="#488A88" stroke-width="2"/>
+                                <text x="40" y="125" text-anchor="middle" font-size="14" fill="#333">H</text>
+                            </g>
+                            <g class="vibrate-atom" style="transform-origin: 100px 160px; animation-delay: -0.9s;">
+                                <circle cx="100" cy="160" r="15" fill="#C6DBDA" stroke="#488A88" stroke-width="2"/>
+                                <text x="100" y="165" text-anchor="middle" font-size="14" fill="#333">H</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Tính chất hóa học -->
+            <div id="tab-2" class="tab-content p-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-nature-green-dark mb-4">2. Tính chất hóa học</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Phần lý thuyết -->
+                    <div class="text-lg space-y-4">
+                        <p>Như thầy Lâm đã nói, ankan (parafin) khá "trơ" về mặt hóa học. Ở điều kiện thường, chúng không phản ứng với axit, kiềm, và chất oxi hóa mạnh.</p>
+                        <p>Tuy nhiên, "người bạn trầm mặc" này có hai phản ứng đặc trưng quan trọng:</p>
+                        
+                        <h4 class="text-xl font-semibold text-nature-green-dark pt-2">a. Phản ứng thế (với Halogen)</h4>
+                        <p>Khi có ánh sáng (as) hoặc nhiệt độ cao, ankan có thể tham gia phản ứng thế với clo (Cl₂) hoặc brom (Br₂).</p>
+                        <p>Ví dụ: Metan tác dụng với Clo:</p>
+                        <div class="bg-gray-100 p-3 rounded-md">
+                            $CH_4 + Cl_2 \xrightarrow{ánh\ sáng} CH_3Cl + HCl$
+                            <br>
+                            <span class="text-sm">(Metyl clorua)</span>
+                        </div>
+                        <p>Phản ứng có thể tiếp tục thế các nguyên tử H còn lại.</p>
+
+                        <h4 class="text-xl font-semibold text-nature-green-dark pt-2">b. Phản ứng cháy (Oxi hóa hoàn toàn)</h4>
+                        <p>Đây là phản ứng "nổi giận" của ankan! Khi bị đốt, ankan cháy và tỏa ra rất nhiều nhiệt.</p>
+                        <p>Phương trình tổng quát:</p>
+                        <div class="bg-gray-100 p-3 rounded-md">
+                            $C_nH_{2n+2} + (\frac{3n+1}{2})O_2 \xrightarrow{t^°} nCO_2 + (n+1)H_2O$
+                        </div>
+                        <p class="font-semibold text-sunny-yellow-dark">Lưu ý quan trọng: Khi đốt ankan, ta luôn thu được $n_{H_2O} > n_{CO_2}$</p>
+                    </div>
+
+                    <!-- Phần SVG Mô phỏng -->
+                    <div class="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-4 min-h-[300px]">
+                        <h4 class="text-xl font-semibold text-text-dark mb-2">Mô phỏng: Phản ứng cháy của Metan</h4>
+                        <svg viewBox="0 0 300 150" class="w-full">
+                            <!-- Chất tham gia -->
+                            <text x="10" y="70" font-size="18" fill="#488A88">$CH_4$</text>
+                            <text x="50" y="70" font-size="18">+</text>
+                            <text x="70" y="70" font-size="18" fill="#DC2626">$O_2$</text>
+
+                            <!-- Mũi tên và ngọn lửa -->
+                            <line x1="100" y1="70" x2="180" y2="70" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <text x="125" y="60" font-size="24">🔥</text>
+                            <text x="130" y="90" font-size="14">$t°$</text>
+
+                            <!-- Sản phẩm -->
+                            <text x="200" y="70" font-size="18" fill="#3B82F6">$CO_2$</text>
+                            <text x="240" y="70" font-size="18">+</text>
+                            <text x="260" y="70" font-size="18" fill="#0EA5E9">$H_2O$</text>
+
+                            <!-- Định nghĩa mũi tên -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                </marker>
+                            </defs>
+                            
+                            <!-- Hoạt ảnh các hạt di chuyển -->
+                            <circle r="4" fill="#488A88">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M 25 65 q 50 -30 110 0" />
+                                <animate attributeName="opacity" values="1;0" dur="3s" repeatCount="indefinite" />
+                            </circle>
+                            <circle r="4" fill="#DC2626">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M 80 65 q 20 20 60 0" />
+                                <animate attributeName="opacity" values="1;0" dur="3s" repeatCount="indefinite" />
+                            </circle>
+                            
+                            <!-- Hoạt ảnh sản phẩm xuất hiện -->
+                            <g style="animation: show-product-co2 3s infinite; animation-delay: 1.5s; opacity: 0;">
+                                <circle cx="215" cy="65" r="4" fill="#3B82F6" />
+                            </g>
+                            <g style="animation: show-product-h2o 3s infinite; animation-delay: 2s; opacity: 0;">
+                                <circle cx="275" cy="65" r="4" fill="#0EA5E9" />
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Ứng dụng -->
+            <div id="tab-3" class="tab-content p-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-nature-green-dark mb-4">3. Ứng dụng</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Phần lý thuyết -->
+                    <div class="text-lg space-y-4">
+                        <p>Tuy "trầm mặc" nhưng ankan là "người bạn" cực kỳ hữu ích trong cuộc sống của chúng ta. Nhờ phản ứng cháy tỏa nhiều nhiệt và tính "trơ" (ít ái lực), ankan có rất nhiều ứng dụng:</p>
+                        
+                        <ul class="list-disc list-inside ml-4 space-y-3">
+                            <li><strong class="text-nature-green-dark">Làm nhiên liệu:</strong> Đây là ứng dụng quan trọng nhất. Khí gas (LPG) chúng ta dùng ở nhà là hỗn hợp Propan ($C_3H_8$) và Butan ($C_4H_{10}$). Xăng, dầu diesel (nhiên liệu cho xe cộ, máy móc) cũng là hỗn hợp của các ankan.</li>
+                            <li><strong class="text-nature-green-dark">Làm nguyên liệu công nghiệp:</strong> Từ ankan, người ta có thể điều chế (qua phản ứng cracking, đề hidro hóa) ra các hidrocacbon không no (như etilen, propilen) để tổng hợp nhựa (polime), cao su, v.v.</li>
+                            <li><strong class="text-nature-green-dark">Làm dung môi:</strong> Do tính "trơ", các ankan lỏng (như hexan, heptan) được dùng làm dung môi để hòa tan các chất hữu cơ, pha sơn...</li>
+                            <li><strong class="text-nature-green-dark">Các ứng dụng khác:</strong> Sáp (nến), dầu bôi trơn, vaseline... cũng là sản phẩm từ ankan.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Phần SVG Mô phỏng -->
+                    <div class="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-4 min-h-[300px]">
+                        <h4 class="text-xl font-semibold text-text-dark mb-4">Mô phỏng: Các ứng dụng của Ankan</h4>
+                        <svg viewBox="0 0 300 150" class="w-full">
+                            <!-- Icon 1: Bình Gas (Nhiên liệu) -->
+                            <g transform="translate(30 30)">
+                                <path class="drawing-path" d="M 10 70 Q 10 50, 30 50 Q 50 50, 50 70 L 50 100 Q 50 120, 30 120 Q 10 120, 10 100 L 10 70 M 20 50 L 20 40 Q 20 30, 30 30 Q 40 30, 40 40 L 40 50" fill="none" stroke="#488A88" stroke-width="3"/>
+                                <text x="25" y="140" text-anchor="middle" fill="#333">Nhiên liệu</text>
+                            </g>
+                            
+                            <!-- Icon 2: Chai nhựa (Nguyên liệu) -->
+                            <g transform="translate(120 30)">
+                                <path class="drawing-path" style="animation-delay: 1s;" d="M 20 120 L 20 60 Q 20 40, 30 40 Q 40 40, 40 60 L 40 120 M 10 120 L 50 120 M 25 40 L 25 30 L 35 30 L 35 40" fill="none" stroke="#FED7C3" stroke-width="3"/>
+                                <text x="30" y="140" text-anchor="middle" fill="#333">Nguyên liệu</text>
+                            </g>
+                            
+                            <!-- Icon 3: Lọ dung môi -->
+                            <g transform="translate(210 30)">
+                                <path class="drawing-path" style="animation-delay: 2s;" d="M 10 120 L 50 120 L 50 50 Q 50 30, 40 30 L 20 30 Q 10 30, 10 50 L 10 120 M 10 80 L 50 80" fill="none" stroke="#488A88" stroke-width="3"/>
+                                <text x="30" y="140" text-anchor="middle" fill="#333">Dung môi</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Kiểm tra -->
+            <div id="tab-test" class="tab-content">
+                <h2 class="text-3xl font-bold text-nature-green-dark mb-4">Bài kiểm tra kiến thức</h2>
+                <p class="text-lg text-gray-700 mb-4">Bây giờ, các em hãy vận dụng kiến thức vừa học để hoàn thành bài trắc nghiệm nhanh dưới đây nhé!</p>
+                <div class="w-full h-[600px] border-4 border-nature-green-dark rounded-lg overflow-hidden shadow-xl">
+                    <!-- 
+                      Lưu ý của người tạo: 
+                      Yêu cầu là '1.com'. Tuy nhiên, '1.com' và nhiều trang web khác
+                      thường chặn việc nhúng qua iframe (lỗi X-Frame-Options). 
+                      Do đó, 'example.com' được dùng làm ví dụ an toàn.
+                      Để chạy đúng, link bài test của thầy cô phải cho phép nhúng.
+                    -->
+                    <iframe id="test-iframe" src="about:blank" class="w-full h-full" title="Bài kiểm tra trắc nghiệm">
+                        Đang tải bài kiểm tra...
+                    </iframe>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Xử lý Splash Screen ---
+            const splashScreen = document.getElementById('splash-screen');
+            const startButton = document.getElementById('start-button');
+            const mainContent = document.getElementById('main-content'); // Thêm dòng này
+
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    // Thêm class để kích hoạt hiệu ứng
+                    splashScreen.classList.add('opacity-0', '-translate-y-full');
+                    
+                    // Sau khi hiệu ứng kết thúc (700ms), ẩn hoàn toàn
+                    setTimeout(() => {
+                        splashScreen.style.display = 'none';
+                    }, 700);
+                });
+            }
+
+            // --- Xử lý Navigation và Tabs ---
+            const hamburgerBtn = document.getElementById('hamburger-button');
+            const closeMenuBtn = document.getElementById('close-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const testIframe = document.getElementById('test-iframe');
+            
+            // Lấy URL bài test từ yêu cầu
+            const testUrl = "https://hwchem9-20251123.netlify.app/"; // Đã cập nhật link mới nhất
+            
+            // Mở menu di động
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('-translate-x-full');
+                });
+            }
+
+            // Đóng menu di động
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener('click', () => {
+                    closeMobileMenu();
+                });
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.add('-translate-x-full');
+            }
+
+            // Xử lý chuyển tab
+            const allTabButtons = document.querySelectorAll('[data-tab]'); // Lấy tất cả các nút
+            const tabContents = document.querySelectorAll('.tab-content');
+            const desktopTabButtons = document.querySelectorAll('.tab-btn');
+            const mobileTabButtons = document.querySelectorAll('.mobile-tab-btn');
+
+            function showTab(tabId) {
+                // 1. Ẩn tất cả nội dung
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                // 2. Hủy kích hoạt tất cả các nút tab (desktop)
+                desktopTabButtons.forEach(btn => {
+                    btn.classList.remove('border-b-4', 'border-nature-green-dark', 'text-nature-green-dark', 'font-semibold');
+                });
+
+                // 3. Hủy kích hoạt tất cả các nút tab (mobile)
+                mobileTabButtons.forEach(btn => {
+                    btn.classList.remove('bg-nature-green-light', 'text-nature-green-dark', 'font-semibold');
+                });
+
+                // 4. Hiển thị nội dung tab được chọn
+                const activeContent = document.getElementById(tabId);
+                if (activeContent) {
+                    activeContent.style.display = 'block';
+                }
+                
+                // 5. Kích hoạt nút desktop tương ứng
+                const activeDesktopBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+                if (activeDesktopBtn) {
+                    activeDesktopBtn.classList.add('border-b-4', 'border-nature-green-dark', 'text-nature-green-dark', 'font-semibold');
+                }
+                
+                // 6. Kích hoạt nút mobile tương ứng
+                const activeMobileBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabId}"]`);
+                if (activeMobileBtn) {
+                    activeMobileBtn.classList.add('bg-nature-green-light', 'text-nature-green-dark', 'font-semibold');
+                }
+
+                // 7. Đặc biệt: Nếu là tab 'Kiểm tra', tải iframe (chỉ tải khi nhấn vào)
+                if (tabId === 'tab-test') {
+                    // Chỉ đặt src nếu nó là 'about:blank', để tránh tải lại
+                    if (testIframe.src === 'about:blank') {
+                        testIframe.src = testUrl;
+                    }
+                }
+                
+                // 8. Đóng menu di động (nếu đang mở)
+                closeMobileMenu();
+                
+                // 9. Phát sự kiện để MathJax xử lý lại
+                window.dispatchEvent(new Event('tab-changed'));
+            }
+
+            // Gán sự kiện click cho tất cả các nút
+            allTabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    showTab(tabId);
+                });
+            });
+
+            // Hiển thị tab đầu tiên khi tải trang
+            showTab('tab-intro'); 
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
